@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: silndoj <silndoj@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 03:31:23 by silndoj           #+#    #+#             */
-/*   Updated: 2024/04/23 23:18:49 by silndoj          ###   ########.fr       */
+/*   Updated: 2024/04/23 23:19:30 by silndoj          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*ft_strdup(const char *s1, int count)
 {
@@ -91,7 +91,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 
 char	*get_next_line(int fd)
 {
-	static char	*block;
+	static char	*block[MAX_FD];
 	char		*nextblock;
 	char		*tmpblock;
 	int			count;
@@ -99,23 +99,23 @@ char	*get_next_line(int fd)
 	count = 0;
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (!block)
+	if (!block[fd])
 	{
-		block = ft_calloc(1, 1);
-		if (!block)
+		block[fd] = ft_calloc(1, 1);
+		if (!block[fd])
 			return (NULL);
 	}
-	block = read_again(fd, block);
-	if (!block)
+	block[fd] = read_again(fd, block[fd]);
+	if (!block[fd])
 		return (NULL);
-	nextblock = nextblock_reset(block, &count);
+	nextblock = nextblock_reset(block[fd], &count);
 	if (!nextblock)
-		return (free(block), block = NULL, NULL);
+		return (free(block[fd]), block[fd] = NULL, NULL);
 	if (ft_strlen(nextblock) == 0)
-		return (free(block), free(nextblock), block = NULL, NULL);
-	tmpblock = ft_substr(block, count, (ft_strlen(block) - count));
-	free(block);
-	return (block = tmpblock, nextblock);
+		return (free(block[fd]), free(nextblock), block[fd] = NULL, NULL);
+	tmpblock = ft_substr(block[fd], count, (ft_strlen(block[fd]) - count));
+	free(block[fd]);
+	return (block[fd] = tmpblock, nextblock);
 }
 //
 //int main(void)
@@ -147,7 +147,7 @@ char	*get_next_line(int fd)
 //close(fd3);
 //return (0);
 //}
-
+//
 /*
 int main(void)
 {
