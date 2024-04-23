@@ -6,7 +6,7 @@
 /*   By: silndoj <silndoj@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 03:31:23 by silndoj           #+#    #+#             */
-/*   Updated: 2024/04/23 00:25:14 by silndoj          ###   ########.fr       */
+/*   Updated: 2024/04/23 07:08:29 by silndoj          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,26 +30,27 @@ char	*read_again(int fd, char *block)
 {
 	char	*block_temp;
 	int		read_bytes;
+	char	*temp;
 
 	read_bytes = 0;
 	while (!ft_strchr(block, '\n'))
 	{
-		block_temp = ft_calloc(BUFFER_SIZE, sizeof(char));
+		block_temp = ft_calloc((BUFFER_SIZE), sizeof(char));
 		if (!block_temp)
 			return (free(block), block = NULL, NULL);
 		read_bytes = read(fd, block_temp, BUFFER_SIZE);
 		if (read_bytes == -1)
-			return (free(block), block = NULL, \
-			free(block_temp), block_temp = NULL, NULL);
+			return (free(block_temp), block_temp = NULL, NULL);
 		if (!read_bytes)
 		{
 			free(block_temp);
 			block_temp = NULL;
 			break ;
 		}
-		block = ft_strjoin(block, block_temp);
+		temp = ft_strjoin(block, block_temp);
+		free(block);
+		block = temp;
 		free(block_temp);
-		block_temp = NULL;
 	}
 	return (block);
 }
@@ -65,7 +66,7 @@ char	*nextblock_reset(char *block, int *count)
 	*count = i;
 	line = ft_strdup(block, i);
 	if (!line)
-		return (free(block), free(line), line = NULL, block = NULL, NULL);
+		return (free(block), block = NULL, NULL);
 	return (line);
 }
 
@@ -81,7 +82,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	sublen = slen - start;
 	if (sublen > len)
 		sublen = len;
-	ptr = (char *) ft_calloc((sublen + 1), sizeof(char));
+	ptr = (char *) ft_calloc((sublen), sizeof(char));
 	if (!ptr)
 		return (NULL);
 	ft_memcpy(ptr, (s + start + 1), sublen);
@@ -92,6 +93,7 @@ char	*get_next_line(int fd)
 {
 	static char	*block;
 	char		*nextblock;
+	char		*tmpblock;
 	int			count;
 
 	count = 0;
@@ -100,10 +102,15 @@ char	*get_next_line(int fd)
 	block = read_again(fd, block);
 	if (!block)
 		return (NULL);
-	nextblock = nextblock_reset(block, &count);
+	//nextblock = nextblock_reset(block, &count);
+	while (block[count] != '\n')
+		count++;
+	nextblock = ft_substr(block, 0, count);
 	if (ft_strlen(nextblock) == 0)
-		return (free(block), block = NULL, NULL);
-	block = ft_substr(block, count, (ft_strlen(block) - count));
+		return (free(nextblock), NULL);
+	tmpblock = ft_substr(block, count, (ft_strlen(block) - count));
+	free(block);
+	block = tmpblock;
 	return (nextblock);
 }
 //
@@ -136,20 +143,23 @@ char	*get_next_line(int fd)
 //close(fd3);
 //return (0);
 //}
-//int main(void)
-//{
-//	int		fd,i;
-//	char	*line;
-//	i = 1;
-//	fd = open("variable_nls.txt", O_RDONLY | O_CREAT);
-//	while (i <= 13)
-//	{
-//		line = get_next_line(fd);
-//		printf("\nline [%02d]: %s", i, line);
-//		free(line);
-//		i++;
-//	}
-//	free(line);
-//	close(fd);
-//	return (0);
-//}
+int main(void)
+{
+	int		fd,i;
+	char	*line;
+	i = 1;
+	fd = open("variable_nls.txt", O_RDONLY | O_CREAT);
+	while (i <= 13)
+	{
+		line = get_next_line(fd);
+		if (i == 1)
+			printf("line [%02d]: %s", i, line);
+		else
+			printf("\nline [%02d]: %s", i, line);
+		free(line);
+		i++;
+	}
+	free(line);
+	close(fd);
+	return (0);
+}
