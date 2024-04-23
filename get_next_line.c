@@ -6,7 +6,11 @@
 /*   By: silndoj <silndoj@student.42heilbronn.de>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 03:31:23 by silndoj           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2024/04/23 07:08:29 by silndoj          ###   ########.fr       */
+=======
+/*   Updated: 2024/04/22 18:13:14 by silndoj          ###   ########.fr       */
+>>>>>>> parent of 7185787... modified get_next_line.c
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +25,7 @@ char	*ft_strdup(const char *s1, int count)
 	slen = ft_strlen(s1);
 	t1 = (char *) ft_calloc((slen + 1), sizeof(char));
 	if (!t1)
-		return (NULL);
+		return (0);
 	ft_memcpy(t1, s1, count + 1);
 	return (t1);
 }
@@ -33,25 +37,34 @@ char	*read_again(int fd, char *block)
 	char	*temp;
 
 	read_bytes = 0;
-	while (!ft_strchr(block, '\n'))
+	while (!ft_strchr(block, '\n') && read_bytes >= 0)
 	{
 		block_temp = ft_calloc((BUFFER_SIZE), sizeof(char));
 		if (!block_temp)
-			return (free(block), block = NULL, NULL);
+			return (NULL);
 		read_bytes = read(fd, block_temp, BUFFER_SIZE);
+<<<<<<< HEAD
 		if (read_bytes == -1)
 			return (free(block_temp), block_temp = NULL, NULL);
 		if (!read_bytes)
+=======
+		if (read_bytes == -1 || read_bytes == 0)
+>>>>>>> parent of 7185787... modified get_next_line.c
 		{
 			free(block_temp);
-			block_temp = NULL;
-			break ;
+			return (NULL);
 		}
+<<<<<<< HEAD
 		temp = ft_strjoin(block, block_temp);
 		free(block);
 		block = temp;
 		free(block_temp);
+=======
+		block = ft_strjoin(block, block_temp);
+>>>>>>> parent of 7185787... modified get_next_line.c
 	}
+	free(block_temp);
+	block_temp = NULL;
 	return (block);
 }
 
@@ -66,7 +79,11 @@ char	*nextblock_reset(char *block, int *count)
 	*count = i;
 	line = ft_strdup(block, i);
 	if (!line)
+<<<<<<< HEAD
 		return (free(block), block = NULL, NULL);
+=======
+		return (NULL);
+>>>>>>> parent of 7185787... modified get_next_line.c
 	return (line);
 }
 
@@ -75,9 +92,10 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	size_t	slen;
 	size_t	sublen;
 	char	*ptr;
+	char	*temp;
 
 	if (!s)
-		return (NULL);
+		return (0);
 	slen = ft_strlen(s);
 	sublen = slen - start;
 	if (sublen > len)
@@ -86,22 +104,35 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	if (!ptr)
 		return (NULL);
 	ft_memcpy(ptr, (s + start + 1), sublen);
-	return (ptr);
+	temp = ft_strdup(ptr, ft_strlen(ptr));
+	if (!temp)
+		return (NULL);
+	free(ptr);
+	return (temp);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*block;
+	static char *temp;
 	char		*nextblock;
 	char		*tmpblock;
 	int			count;
 
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
 	count = 0;
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &nextblock, 0) < 0)
-		return (free(block), block = NULL, NULL);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if (temp != NULL)
+	{
+		block = ft_strdup(temp, ft_strlen(temp));
+		free(temp);
+	}
 	block = read_again(fd, block);
 	if (!block)
 		return (NULL);
+<<<<<<< HEAD
 	//nextblock = nextblock_reset(block, &count);
 	while (block[count] != '\n')
 		count++;
@@ -111,36 +142,51 @@ char	*get_next_line(int fd)
 	tmpblock = ft_substr(block, count, (ft_strlen(block) - count));
 	free(block);
 	block = tmpblock;
+=======
+	nextblock = nextblock_reset(block, &count);
+	block = ft_substr(block, count, (ft_strlen(block) - count));
+	if (block != NULL)
+	{
+		temp = ft_strdup(block, ft_strlen(block));
+		free(block);
+	}
+//	if (ft_strlen(block) == 0)
+//	{
+//		free(block);
+//		block = NULL;
+//	}
+>>>>>>> parent of 7185787... modified get_next_line.c
 	return (nextblock);
 }
-//
-//int main(void)
-//{
-//char	*line;
-//int		i;
-//int		fd1;
+
+int main(void)
+{
+char	*line;
+int		i;
+int		fd1;
 //int		fd2;
 //int		fd3;
-//fd1 = open("tests/test.txt", O_RDONLY);
+fd1 = open("tests/test.txt", O_RDONLY);
 //fd2 = open("tests/test2.txt", O_RDONLY);
 //fd3 = open("tests/test3.txt", O_RDONLY);
-//i = 1;
-//while (i < 7)
-//{
-//	line = get_next_line(fd1);
-//	printf("\nline [%02d]: %s", i, line);
-//	free(line);
+i = 1;
+while (i < 7)
+{
+	line = get_next_line(fd1);
+	printf("line [%02d]: %s", i, line);
+	free(line);
 //	line = get_next_line(fd2);
-//	printf("\nline(1) [%02d]: %s", i, line);
+//	printf("line [%02d]: %s", i, line);
 //	free(line);
 //	line = get_next_line(fd3);
-//	printf("\nline(2) [%02d]: %s", i, line);
+//	printf("line [%02d]: %s", i, line);
 //	free(line);
-//	i++;
-//}
-//close(fd1);
+	i++;
+}
+close(fd1);
 //close(fd2);
 //close(fd3);
+<<<<<<< HEAD
 //return (0);
 //}
 int main(void)
@@ -163,3 +209,23 @@ int main(void)
 	close(fd);
 	return (0);
 }
+=======
+return (0);
+}
+//int main(void)
+//{
+//	int		fd,i;
+//	char	*line;
+//	i = 0;
+//	fd = open("example.txt", O_RDONLY | O_CREAT);
+//	while (i < 16)
+//	{
+//		line = get_next_line(fd);
+//		printf("line: %s", line);
+//		free(line);
+//		i++;
+//	}
+//	close(fd);
+//	return (0);
+//}
+>>>>>>> parent of 7185787... modified get_next_line.c
